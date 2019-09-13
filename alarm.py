@@ -14,3 +14,7 @@ for ctf in ctfs:
     host = ctfs[ctf]["host"]
     user = ctfs[ctf]["user"]
     paswd = ctfs[ctf]["paswd"]
+    s = requests.Session()
+    res = s.get("https://ctf.forensia.linti.unlp.edu.ar/login").text
+    bs = BeautifulSoup(res, "html.parser")
+    nonce = res
