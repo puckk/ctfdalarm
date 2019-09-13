@@ -1,0 +1,11 @@
+mail:
+  from: "mail@example.unlp.edu.ar"
+  from_pass: "password"
+  smtp_host: "smtp.google.com"
+  to: "example@gmail.com"
+
+ctfds:
+  example1:
+    host: "https://ctf.example1.com"
+    user: "my_username"
+    paswd: "my_password"
