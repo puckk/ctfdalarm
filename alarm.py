@@ -1,7 +1,25 @@
 import yaml
 import os
 import requests
+import re
 from bs4 import BeautifulSoup
+import smtplib
+
+
+def sendmail(user, passwd, smtphost, to, ctf, host):
+    SUBJECT = 'se actualizo {}'.format(ctf)
+    server = smtplib.SMTP(smtphost, 587)
+    server.ehlo()
+    server.starttls()
+    server.login(user, passwd)
+    BODY = '\r\n'.join(['To: %s' % to,
+                        'From: %s' % user,
+                        'Subject: %s' % SUBJECT,
+                        '', host])
+    server.sendmail(user, [to], BODY)
+    print('email sent')
+    server.quit()
+
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 config_file = 'config.yml'
@@ -15,6 +33,34 @@ for ctf in ctfs:
     user = ctfs[ctf]["user"]
     paswd = ctfs[ctf]["paswd"]
     s = requests.Session()
-    res = s.get("https://ctf.forensia.linti.unlp.edu.ar/login").text
+
+    # GET to login
+    res = s.get("{}/login".format(host)).text
+
+    # Extract nonce
     bs = BeautifulSoup(res, "html.parser")
-    nonce = res
+    pattern = re.compile(r"csrf_nonce = \"(.*?)\"", re.MULTILINE | re.DOTALL)
+    script = bs.find("script", text=pattern)
+    nonce = pattern.search(script.text).group(1)
+
+    # Post to login
+    res = s.post("{}/login".format(host), data={"nonce":nonce, "name":user, "password":paswd})
+
+    # get challenges and check if diff
+    data = s.get("{}/api/v1/challenges".format(host)).text
+
+    if not (os.path.exists(os.path.join(base_path,"db_{}".format(ctf)))):
+        d = open(os.path.join(base_path,"db_{}".format(ctf)), "w")
+        d.close()
+    d = open(os.path.join(base_path,"db_{}".format(ctf)))
+    f = d.read()
+    d.close()
+    if (f != data):
+        print("Differences")
+        sendmail(cfg["mail"]["from"], cfg["mail"]["from_pass"], cfg["mail"]["smtp_host"], cfg["mail"]["to"], ctf, host)
+        d = open("db_{}".format(ctf),"w")
+        d.write(data)
+        d.close()
+    else:
+        print("son iguales")
+
