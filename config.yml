@@ -1,0 +1,7 @@
+ctfds:
+  forensia:
+    host: "https://ctf.forensia.linti.unlp.edu.ar"
+    user: "pepe"
+    paswd: "pepe"
+  intro:
+    host: "http://ic.catedras.linti.unlp.edu.ar"
