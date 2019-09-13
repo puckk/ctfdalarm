@@ -21,6 +21,18 @@ def sendmail(user, passwd, smtphost, to, ctf, host):
     server.quit()
 
 
+def send_telegram(bot_token, bot_chatID, ctf, host):
+    msg = 'se actualizo {}\n{}'.format(ctf, host)
+    bot_token = ''
+    bot_chatID = ''
+    send_text = 'https://api.telegram.org/bot' + bot_token + \
+        '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + msg
+
+    response = requests.get(send_text)
+
+    return response.json()
+
+
 base_path = os.path.dirname(os.path.abspath(__file__))
 config_file = 'config.yml'
 
@@ -44,23 +56,28 @@ for ctf in ctfs:
     nonce = pattern.search(script.text).group(1)
 
     # Post to login
-    res = s.post("{}/login".format(host), data={"nonce":nonce, "name":user, "password":paswd})
+    res = s.post("{}/login".format(host),
+                 data={"nonce": nonce, "name": user, "password": paswd})
 
     # get challenges and check if diff
     data = s.get("{}/api/v1/challenges".format(host)).text
 
-    if not (os.path.exists(os.path.join(base_path,"db_{}".format(ctf)))):
-        d = open(os.path.join(base_path,"db_{}".format(ctf)), "w")
+    if not (os.path.exists(os.path.join(base_path, "db_{}".format(ctf)))):
+        d = open(os.path.join(base_path, "db_{}".format(ctf)), "w")
         d.close()
-    d = open(os.path.join(base_path,"db_{}".format(ctf)))
+    d = open(os.path.join(base_path, "db_{}".format(ctf)))
     f = d.read()
     d.close()
     if (f != data):
         print("Differences")
-        sendmail(cfg["mail"]["from"], cfg["mail"]["from_pass"], cfg["mail"]["smtp_host"], cfg["mail"]["to"], ctf, host)
-        d = open("db_{}".format(ctf),"w")
+        if cfg["mail"]["enabled"]:
+            sendmail(cfg["mail"]["from"], cfg["mail"]["from_pass"],
+                     cfg["mail"]["smtp_host"], cfg["mail"]["to"], ctf, host)
+        if cfg["telegram"]["enabled"]:
+            send_telegram(cfg["telegram"]["bot_token"],
+                          cfg["telegram"]["bot_token"], ctf, host)
+        d = open("db_{}".format(ctf), "w")
         d.write(data)
         d.close()
     else:
         print("son iguales")
-

@@ -1,8 +1,15 @@
 mail:
+  enabled: False
   from: "mail@example.unlp.edu.ar"
   from_pass: "password"
   smtp_host: "smtp.google.com"
   to: "example@gmail.com"
+
+telegram:
+  enabled: True
+  bot_token: "your_bot_token"
+  chat_id: "bot_chatID"
+  # take it from https://api.telegram.org/bot<YourBOTToken>/getUpdates
 
 ctfds:
   example1:
