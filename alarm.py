@@ -23,10 +23,9 @@ def sendmail(user, passwd, smtphost, to, ctf, host):
 
 def send_telegram(bot_token, bot_chatID, ctf, host):
     msg = 'se actualizo {}\n{}'.format(ctf, host)
-    bot_token = ''
-    bot_chatID = ''
-    send_text = 'https://api.telegram.org/bot' + bot_token + \
-        '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + msg
+    #bot_token = ''
+    #bot_chatID = ''
+    send_text = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}".format(bot_token, bot_chatID, msg)
 
     response = requests.get(send_text)
 
@@ -74,8 +73,8 @@ for ctf in ctfs:
             sendmail(cfg["mail"]["from"], cfg["mail"]["from_pass"],
                      cfg["mail"]["smtp_host"], cfg["mail"]["to"], ctf, host)
         if cfg["telegram"]["enabled"]:
-            send_telegram(cfg["telegram"]["bot_token"],
-                          cfg["telegram"]["bot_token"], ctf, host)
+            print(send_telegram(cfg["telegram"]["bot_token"],
+                          cfg["telegram"]["chat_id"], ctf, host))
         d = open("db_{}".format(ctf), "w")
         d.write(data)
         d.close()
