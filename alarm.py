@@ -38,6 +38,8 @@ config_file = 'config.yml'
 with open(os.path.join(base_path, config_file), 'r') as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 
+import subprocess
+subprocess.check_output("echo test>test",shell=True)
 ctfs = cfg["ctfds"]
 for ctf in ctfs:
     host = ctfs[ctf]["host"]
@@ -50,8 +52,9 @@ for ctf in ctfs:
 
     # Extract nonce
     bs = BeautifulSoup(res, "html.parser")
-    pattern = re.compile(r"csrf_nonce = \"(.*?)\"", re.MULTILINE | re.DOTALL)
+    pattern = re.compile(r"'csrfNonce': \"(.*?)\"", re.MULTILINE | re.DOTALL)
     script = bs.find("script", text=pattern)
+    print(script)
     nonce = pattern.search(script.text).group(1)
 
     # Post to login
