@@ -62,24 +62,27 @@ for ctf in ctfs:
                  data={"nonce": nonce, "name": user, "password": paswd})
 
     # get challenges and check if diff
-    data = s.get("{}/api/v1/challenges".format(host)).text
-
-    if not (os.path.exists(os.path.join(base_path, "db_{}".format(ctf)))):
-        d = open(os.path.join(base_path, "db_{}".format(ctf)), "w")
-        d.close()
-    d = open(os.path.join(base_path, "db_{}".format(ctf)))
-    f = d.read()
-    d.close()
-    if (f != data):
-        print("Differences")
-        if cfg["mail"]["enabled"]:
-            sendmail(cfg["mail"]["from"], cfg["mail"]["from_pass"],
-                     cfg["mail"]["smtp_host"], cfg["mail"]["to"], ctf, host)
-        if cfg["telegram"]["enabled"]:
-            print(send_telegram(cfg["telegram"]["bot_token"],
-                          cfg["telegram"]["chat_id"], ctf, host))
-        d = open("db_{}".format(ctf), "w")
-        d.write(data)
-        d.close()
+    dd = s.get("{}/api/v1/challenges".format(host))
+    if dd.status_code == 200:
+      data = dd.text
+      if not (os.path.exists(os.path.join(base_path, "db_{}".format(ctf)))):
+          d = open(os.path.join(base_path, "db_{}".format(ctf)), "w")
+          d.close()
+      d = open(os.path.join(base_path, "db_{}".format(ctf)))
+      f = d.read()
+      d.close()
+      if (f != data):
+          print("Differences")
+          if cfg["mail"]["enabled"]:
+              sendmail(cfg["mail"]["from"], cfg["mail"]["from_pass"],
+                       cfg["mail"]["smtp_host"], cfg["mail"]["to"], ctf, host)
+          if cfg["telegram"]["enabled"]:
+              print(send_telegram(cfg["telegram"]["bot_token"],
+                            cfg["telegram"]["chat_id"], ctf, host))
+          d = open("db_{}".format(ctf), "w")
+          d.write(data)
+          d.close()
+      else:
+           print("son iguales")
     else:
-        print("son iguales")
+       print("not 200")
